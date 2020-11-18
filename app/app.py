@@ -1,4 +1,5 @@
 
+from logging import debug
 import eventlet
 import socketio
 import multiprocessing
@@ -14,6 +15,9 @@ def respond():
     sio.emit('serverToClient', urls)
     print('urls ', urls)
 
+def access():
+    print('acces')
+
 @sio.event
 def connect(sid, environ):
     print('connect ', sid)
@@ -21,7 +25,7 @@ def connect(sid, environ):
 @sio.event
 def clientToServer(sid, data):
     urls = text_to_image()
-    sio.emit('serverToClient', urls)
+    sio.emit('serverToClient', urls, callback=access)
     print('urls ', urls)
     
 
@@ -30,4 +34,4 @@ def disconnect(sid):
     print('disconnect ', sid)
 
 if __name__ == '__main__':
-    eventlet.wsgi.server(eventlet.listen(('', 5000)), app)
+    eventlet.wsgi.server(eventlet.listen(('', 5000)), app, debug=True)

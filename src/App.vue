@@ -10,7 +10,7 @@
       </button>
     </div>
     <div class="w-screen h-screen flex flex-wrap">
-      <div v-for="url in urls" :key="url" class="w-1/4 p-4">
+      <div v-for="(url, index) in urls" :key="index" class="w-1/4 p-4">
         <img class="object-cover" :src="url" alt="" />
       </div>
     </div>
@@ -38,7 +38,6 @@ export default {
       console.log("socket connected");
     },
     serverToClient: function(urls) {
-      console.log(urls);
       this.urls = urls;
       this.isActive = false;
     },
