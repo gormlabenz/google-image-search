@@ -1,9 +1,10 @@
 
 from logging import debug
 import eventlet
+from nltk.util import pr
 import socketio
 import multiprocessing
-from text_to_image import text_to_image
+from text_to_image import text_to_image, blob_to_image
 
 sio = socketio.Server(cors_allowed_origins='http://localhost:8080')
 app = socketio.WSGIApp(sio)
@@ -27,6 +28,12 @@ def clientToServer(sid, data):
     urls = text_to_image()
     sio.emit('serverToClient', urls, callback=access)
     print('urls ', urls)
+
+@sio.event
+def clientToServerAudioBlob(sid, data):
+    print('type ', type(data))
+    print('audio ', data)
+    #blob_to_image(data)
     
 
 @sio.event

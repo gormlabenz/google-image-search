@@ -1,12 +1,26 @@
 <template>
   <div>
-    <div class=" text-center m-8">
+    <div class="flex justify-center m-8">
       <button
         class="border-red-600 bg-white border-2 px-4 py-2 rounded-lg text-gray-800 font-bold shadow-md"
         v-bind:class="{ 'bg-red-600 text-gray-100': isActive }"
         @click="sendMessage"
       >
         Record
+      </button>
+      <button
+        class="border-red-600 bg-white border-2 px-4 py-2 rounded-lg text-gray-800 font-bold shadow-md"
+        v-bind:class="{ 'bg-red-600 text-gray-100': isActive }"
+        @click="startRecording"
+      >
+        Record Audio
+      </button>
+      <button
+        class="border-red-600 bg-white border-2 px-4 py-2 rounded-lg text-gray-800 font-bold shadow-md"
+        v-bind:class="{ 'bg-red-600 text-gray-100': isActive }"
+        @click="stopRecording"
+      >
+        End sRecord
       </button>
     </div>
     <div class="w-screen h-screen flex flex-wrap">
@@ -31,7 +45,18 @@ export default {
         "https://images-na.ssl-images-amazon.com/images/I/41jIw1mUV4L._AC_.jpg",
       ],
       isActive: false,
+      audioChunks: [],
+      mediaRecorder: "",
+      audioBlob: "",
     };
+  },
+  mounted() {
+    navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
+      this.mediaRecorder = new MediaRecorder(stream);
+      this.mediaRecorder.addEventListener("dataavailable", (event) => {
+        this.audioChunks.push(event.data);
+      });
+    });
   },
   sockets: {
     connect: function() {
@@ -46,6 +71,20 @@ export default {
     sendMessage() {
       this.$socket.emit("clientToServer", "record");
       this.isActive = true;
+    },
+    startRecording() {
+      this.mediaRecorder.start();
+    },
+    stopRecording() {
+      console.log("stop recording");
+      this.mediaRecorder.stop();
+      this.audioBlob = new Blob(this.audioChunks);
+      const audioUrl = URL.createObjectURL(this.audioBlob);
+      const audio = new Audio(audioUrl);
+      audio.play();
+      console.log("Audio typeof", typeof audio);
+      console.log("Audio ", audio);
+      this.$socket.emit("clientToServerAudioBlob", audio);
     },
   },
 };
